@@ -1,0 +1,39 @@
+@font-face{
+  font-family: "Pretendard-semibold";
+  font-weight: normal;
+  src: url('./assets/fonts/Pretendard/Pretendard-SemiBold.otf')
+}
+@font-face{
+  font-family:"Pretendard-bold";
+  font-weight: normal;
+  src:url("./assets/fonts/Pretendard/Pretendard-Bold.otf")
+}
+@font-face{
+  font-family:"Pretendard-medium";
+  font-weight:normal;
+  src:url("./assets/fonts/Pretendard/Pretendard-Medium.otf")
+}
+@font-face{
+  font-family:"Pretendard-regular";
+  font-weight:normal;
+  src:url("./assets/fonts/Pretendard/Pretendard-Regular.otf")
+}
+:root {
+  --font-semibold:"Pretendard-semibold";
+  --font-bold:"Pretendard-bold";
+  --font-medium:"Pretendard-medium";
+  --font-regular:"Pretendard-regular";
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}

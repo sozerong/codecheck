@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import zipfile
+import tarfile
 
 class DataPreprocessingAPIView(APIView):
     """
@@ -26,7 +28,7 @@ class DataPreprocessingAPIView(APIView):
     def post(self, request):
         # 파일 업로드 처리
         uploaded_file = request.FILES.get("file")  # 클라이언트에서 업로드한 파일
-        if not uploaded_file:
+        if not uploaded_file: 
             return Response({"error": "No file uploaded."}, status=400)
 
         # 압축 파일 저장
