@@ -7,6 +7,12 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+import logging
+import requests
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+logger = logging.getLogger(__name__)
 
 class FileProcessingAPIView(APIView):
     """
@@ -37,6 +43,7 @@ class FileProcessingAPIView(APIView):
         output_json_path = "./processed_input.json"
         os.makedirs(upload_dir, exist_ok=True)
         os.makedirs(extract_dir, exist_ok=True)
+        llama_training_api_url = "http://localhost:8000/model_evaluation/evaluation"  # Llama 학습 API URL
 
         # 업로드된 파일 저장
         file_path = os.path.join(upload_dir, uploaded_file.name)
@@ -74,12 +81,18 @@ class FileProcessingAPIView(APIView):
                     print(f"파일 읽기 오류: {file_path}, {e}")
 
         try:
-            with open(output_json_path, "w", encoding="utf-8") as json_file:
-                json.dump(processed_data, json_file, indent=4, ensure_ascii=False)
+            with open(output_json_path, "rb") as json_file:
+                response = requests.post(llama_training_api_url, files={"file": json_file})
+            if response.status_code == 200:
+                logger.info(f"Successfully sent results to Llama training API: {llama_training_api_url}")
+            else:
+                logger.error(f"Failed to send results to Llama training API: {response.status_code} - {response.text}")
+                return Response({"error": "Failed to send results to Llama training API"}, status=500)
         except Exception as e:
-            return Response({"error": f"JSON 저장 오류: {str(e)}"}, status=500)
+            logger.error(f"Error sending results to Llama training API: {str(e)}")
+            return Response({"error": f"Error sending results to Llama training API: {str(e)}"}, status=500)
 
         return Response({
-            "message": "파일 전처리가 성공적으로 완료되었습니다.",
+            "message": "AI 평가가 성공적으로 완료되었고 Llama 학습 API로 전송되었습니다.",
             "output_file": output_json_path
         })
