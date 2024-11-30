@@ -1,0 +1,19 @@
+version: "3.10"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - AWS_ACCESS_KEY_ID=451972402197
+      - AWS_SECRET_ACCESS_KEY=AKIAWSO5HRQK67EDSVM4
+      - AWS_REGION=ap-northeast-2
+      - HOST_URL=http://host.docker.internal:8000  # 컨테이너가 호스트를 참조
+
+    command: python manage.py runserver 0.0.0.0:8000
