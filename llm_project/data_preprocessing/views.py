@@ -12,7 +12,8 @@ from drf_yasg import openapi
 
 class DataPreprocessingAPIView(APIView):
     """
-    Data Preprocessing API: Unpacks uploaded compressed files and converts them into a dataset format.
+    Data Preprocessing API: Unpacks uploaded compressed files and converts them into a dataset format
+    for StarCoder fine-tuning or inference.
     """
     parser_classes = [MultiPartParser]
 
@@ -35,7 +36,7 @@ class DataPreprocessingAPIView(APIView):
 
         upload_dir = "./uploaded_files"
         extract_dir = "./extracted_files"
-        output_json_path = "./llama3_input.json"
+        output_jsonl_path = "./starcoder_input.jsonl"
 
         # Create directories
         os.makedirs(upload_dir, exist_ok=True)
@@ -98,32 +99,31 @@ class DataPreprocessingAPIView(APIView):
                     code_content = file.read()
                     metadata = analyze_python_code(code_content)
 
-                    # 프롬프트에 개선점 요청과 평가 기준 포함
+                    # StarCoder에 맞는 JSONL 데이터 구성
                     data.append({
-                        "instruction": (
-                            f"Analyze the following code in {os.path.basename(file_path)}. "
-                            "Provide suggestions for improvement, focusing on code readability, performance, "
-                            "and maintainability. For each suggestion, explain why the change is necessary "
-                            "and the benefits it brings to the code. Finally, provide an evaluation score "
-                            "from 1 to 10, where 1 is poor and 10 is excellent, based on overall code quality."
+                        "prompt": (
+                            f"### File: {os.path.basename(file_path)}\n"
+                            f"Analyze the following code. Provide detailed suggestions to improve readability, "
+                            f"performance, and maintainability. Include specific examples of improvements."
                         ),
-                        "input": code_content,
-                        "metadata": metadata,
-                        "output": ""  # Llama 모델 출력이 여기에 들어감
+                        "completion": (
+                            f"\n{code_content}\n\n### Suggestions:\n"  # 코드와 함께 제공할 문맥.
+                        )
                     })
             except Exception as e:
                 print(f"Error reading file {file_path}: {e}")
 
-
-        # Save the dataset
+        # Save the dataset in JSONL format
         try:
-            with open(output_json_path, "w", encoding="utf-8") as json_file:
-                json.dump(data, json_file, indent=4, ensure_ascii=False)
+            with open(output_jsonl_path, "w", encoding="utf-8") as jsonl_file:
+                for entry in data:
+                    json.dump(entry, jsonl_file, ensure_ascii=False)
+                    jsonl_file.write("\n")  # JSONL 형식은 한 줄에 하나의 JSON
         except Exception as e:
             return Response({"error": f"Failed to save dataset: {str(e)}"}, status=500)
 
         return Response({
             "message": "Data preprocessing completed successfully.",
-            "output_file": output_json_path,
+            "output_file": output_jsonl_path,
             "processed_files": len(filtered_files)
         })
